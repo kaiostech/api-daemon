@@ -307,10 +307,10 @@ mod test {
 
         let serialized = sent_message.serialize();
         assert_ne!(serialized.len(), 0);
-
-        let _received_message =
-            SenderKeyDistributionMessage::deserialize(&serialized, g_context.native()).unwrap();
-
+        unsafe {
+            let _received_message =
+                SenderKeyDistributionMessage::deserialize(&serialized, g_context.native()).unwrap();
+        }
         // Make sure we don't leak.
         unsafe {
             let _: Rc<TestStoreData> = Rc::from_raw(bob_user_data as *const _);
@@ -353,8 +353,9 @@ mod test {
 
         let serialized = sent_alice_distribution_message.serialize();
 
-        let received_alice_distribution_message =
-            SenderKeyDistributionMessage::deserialize(&serialized, g_context.native()).unwrap();
+        let received_alice_distribution_message = unsafe {
+            SenderKeyDistributionMessage::deserialize(&serialized, g_context.native()).unwrap()
+        };
 
         // Processing Alice's distribution message.
         bob_session_builder

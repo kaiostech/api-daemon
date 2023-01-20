@@ -499,7 +499,11 @@ extern "C" fn store_sender_key(
     let _ = Rc::into_raw(ctxt);
 
     build_response(receiver, "sender_key_store.store_sender_key", |result| {
-        i32::from(result)
+        if result {
+            0
+        } else {
+            SIGNAL_GENERIC_ERROR
+        }
     })
 }
 

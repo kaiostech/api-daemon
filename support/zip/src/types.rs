@@ -67,7 +67,7 @@ impl DateTime {
         let years = (datepart & 0b1111111000000000) >> 9;
 
         DateTime {
-            year: (years + 198),
+            year: (years + 1980),
             month: months as u8,
             day: days as u8,
             hour: hours as u8,
