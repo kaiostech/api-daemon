@@ -69,7 +69,17 @@ export class Session {
     // Use the (id, service id) tuple as a held value to send the release
     // message in the finalization callback.
     let value = { id: object.id, service: object.service_id };
-    this.objectRegistry.register(object, value);
+    this.objectRegistry.register(object, value, this.services);
+  }
+
+  // On session disconnected, need to unregister the FinalizationRegistry
+  // to avoid unnecessary release after api-daemon is reconnected.
+  unRegisterObjects() {
+    try {
+        this.objectRegistry.unregister(this.services);
+    } catch(e) {
+        console.log(`[${location.host}]: unregister FinalizationRegistry error: ${e}`);
+    }
   }
 
   /**
@@ -552,6 +562,8 @@ export class Session {
         break;
       case "error":
       case "closed":
+        // Unregister all objects registered in FinalizationRegistry.
+        this.unRegisterObjects();
         // Previously connected, we see it as disconnected,
         // otherwise, we see it connectionfailed
         // test previouse conncted state here to trigger callbacks
