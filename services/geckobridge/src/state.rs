@@ -130,7 +130,13 @@ impl GeckoBridgeState {
 
     /// Delegates that are only available on device builds.
     pub fn device_delegates_ready(&self) -> bool {
-        self.mobilemanager.is_some() && self.networkmanager.is_some()
+        // Check delegate readiness of mobilemanager only if RIL is enabled
+        let has_ril = self.get_bool_pref("b2g.ril.enabled").unwrap_or(false);
+        if has_ril {
+          self.networkmanager.is_some() && self.mobilemanager.is_some()
+        } else {
+          self.networkmanager.is_some()
+        }
     }
 
     /// true if all the expected delegates have been set.
