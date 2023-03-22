@@ -1,10 +1,6 @@
 [source.crates-io]
 replace-with = "vendored-sources"
 
-[source."https://github.com/acw/simple_asn1"]
-git = "https://github.com/acw/simple_asn1"
-replace-with = "vendored-sources"
-
 [source."https://github.com/fabricedesre/actix.git"]
 git = "https://github.com/fabricedesre/actix.git"
 branch = "parking-lot-0.12"

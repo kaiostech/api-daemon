@@ -1,5 +1,5 @@
 # Start with a rustup image providing the stable release.
-image: "kaiostech/sidl-new:latest"
+image: ${CI_REGISTRY}/kaios/sidl:1.66.1_9_0 
 
 # Environment variables
 variables:
@@ -8,10 +8,7 @@ variables:
 
 # Setup SSH key to access git
 before_script:
-  - eval $(ssh-agent -s)
-  - ssh-add <(echo "$SSH_PRIVATE_KEY")
-  - mkdir -p ~/.ssh
-  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - echo -e "machine ${CI_SERVER_HOST}\nlogin gitlab-ci-token\npassword ${CI_JOB_TOKEN}" > ~/.netrc
 
 stages:
   - build_and_test
