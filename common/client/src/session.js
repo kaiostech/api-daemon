@@ -569,9 +569,9 @@ export class Session {
         // test previouse conncted state here to trigger callbacks
         if (this.connected) {
           if (typeof this.session_state.onsessiondisconnected === "function") {
-            this.connected = false;
             this.session_state.onsessiondisconnected();
           }
+          this.connected = false;
         } else {
           if (
             typeof this.session_state.onsessionconnectionerror === "function"
@@ -590,6 +590,9 @@ export class Session {
   }
 
   wait_reopen() {
+    if (this.reconnect_interval < 8000) {
+      this.reconnect_interval = this.reconnect_interval * 2;
+    }
     setTimeout(
       () => {
         if (this.connected) {
@@ -610,13 +613,7 @@ export class Session {
           this.reconnect();
         }
       },
-      () => {
-        this.reconnect_interval = this.reconnect_interval * 2;
-        if (this.reconnect_interval > 8000) {
-          return 8000;
-        }
-        return this.reconnect_interval;
-      }
+      this.reconnect_interval
     );
   }
 
