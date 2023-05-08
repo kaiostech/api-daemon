@@ -37,7 +37,6 @@ macro_rules! getDelegateWrapper {
 pub struct GeckoBridgeService {
     id: TrackerId,
     state: Shared<GeckoBridgeState>,
-    only_register_token: bool,
     owns_delegates: bool,
     pool: ThreadPool,
 }
@@ -87,7 +86,7 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         pref_name: String,
         value: bool,
     ) {
-        if self.only_register_token {
+        if !self.owns_delegates {
             responder.reject();
             return;
         }
@@ -101,7 +100,7 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         pref_name: String,
         value: String,
     ) {
-        if self.only_register_token {
+        if !self.owns_delegates {
             responder.reject();
             return;
         }
@@ -115,7 +114,7 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         pref_name: String,
         value: i64,
     ) {
-        if self.only_register_token {
+        if !self.owns_delegates {
             responder.reject();
             return;
         }
@@ -128,11 +127,6 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesSetPowerManagerDelegateResponder,
         delegate: ObjectRef,
     ) {
-        if self.only_register_token {
-            responder.reject();
-            return;
-        }
-
         // Get the proxy and update our state.
         if let Some(power_delegate) = self.get_power_manager_delegate(delegate) {
             self.state.lock().set_powermanager_delegate(power_delegate);
@@ -148,11 +142,6 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesSetAppsServiceDelegateResponder,
         delegate: ObjectRef,
     ) {
-        if self.only_register_token {
-            responder.reject();
-            return;
-        }
-
         // Get the proxy and update our state.
         if let Some(app_delegate) = self.get_app_service_delegate(delegate) {
             self.state.lock().set_apps_service_delegate(app_delegate);
@@ -168,11 +157,6 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesSetMobileManagerDelegateResponder,
         delegate: ObjectRef,
     ) {
-        if self.only_register_token {
-            responder.reject();
-            return;
-        }
-
         // Get the proxy and update our state.
         if let Some(mobile_delegate) = self.get_mobile_manager_delegate(delegate) {
             self.state
@@ -190,11 +174,6 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesSetNetworkManagerDelegateResponder,
         delegate: ObjectRef,
     ) {
-        if self.only_register_token {
-            responder.reject();
-            return;
-        }
-
         // Get the proxy and update our state.
         if let Some(network_delegate) = self.get_network_manager_delegate(delegate) {
             self.state
@@ -212,11 +191,6 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesSetPreferenceDelegateResponder,
         delegate: ObjectRef,
     ) {
-        if self.only_register_token {
-            responder.reject();
-            return;
-        }
-
         // Get the proxy and update our state.
         if let Some(pref_delegate) = self.get_preference_delegate(delegate) {
             self.state.lock().set_preference_delegate(pref_delegate);
@@ -264,7 +238,7 @@ impl GeckoFeaturesMethods for GeckoBridgeService {
         responder: GeckoFeaturesImportSimContactsResponder,
         sim_contacts: Option<Vec<generated::common::SimContactInfo>>,
     ) {
-        if self.only_register_token {
+        if !self.owns_delegates {
             responder.reject();
             return;
         }
@@ -318,13 +292,11 @@ impl Service<GeckoBridgeService> for GeckoBridgeService {
         // Content processes that will connect afterwards can still use it
         // to register tokens.
         let state = Self::shared_state();
-        let only_register_token = state.lock().is_ready();
         let service_id = helper.session_tracker_id().service();
         let pool = state.lock().pool.clone();
         Ok(GeckoBridgeService {
             id: service_id,
             state,
-            only_register_token,
             owns_delegates: false,
             pool,
         })
