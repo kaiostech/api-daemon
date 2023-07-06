@@ -64,8 +64,8 @@ pub struct B2GFeatures {
     version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     focus_color: Option<String>,
-    #[serde(default = "B2GFeatures::default_hashmap")]
-    dependencies: HashMap<String, String>, // A list of hashMap<package_name, package_version>
+    #[serde(skip_serializing_if = "Option::is_none")]
+    dependencies: Option<HashMap<String, String>>, // A list of hashMap<package_name, package_version>
     #[serde(skip_serializing_if = "Option::is_none")]
     origin: Option<String>,
     #[serde(default = "default_as_false")]
@@ -101,9 +101,6 @@ fn default_as_false() -> bool {
 }
 
 impl B2GFeatures {
-    fn default_hashmap() -> HashMap<String, String> {
-        HashMap::new()
-    }
     pub fn get_locales(&self) -> Option<Value> {
         self.locales.clone()
     }
